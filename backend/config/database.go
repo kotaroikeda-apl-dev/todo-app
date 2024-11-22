@@ -1,19 +1,31 @@
 package config
 
 import (
+    "fmt"
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
-    "log"
+    "os"
 )
 
-var DB *gorm.DB
+var DB *gorm.DB // グローバル変数を追加
 
-func ConnectDB() {
-    dsn := "host=localhost user=kotaroikeda password=kotaro220 dbname=tododb port=5432 sslmode=disable"
-    database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func ConnectDB() error {
+    host := os.Getenv("DATABASE_HOST")
+    user := os.Getenv("DATABASE_USER")
+    password := os.Getenv("DATABASE_PASSWORD")
+    dbName := os.Getenv("DATABASE_NAME")
+    port := "5432"
+
+    dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, dbName, port)
+    
+    // デバッグ用に DSN を出力
+    fmt.Println("Connecting to database with DSN:", dsn)
+
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
-        log.Fatal("Failed to connect to the database:", err)
+        return fmt.Errorf("failed to connect to database: %w", err)
     }
-    DB = database
-}
 
+    DB = db // グローバル変数に代入
+    return nil
+}

@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend-container
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_HOST: database # databaseコンテナ名をホスト名として使用
+      DATABASE_USER: kotaroikeda
+      DATABASE_PASSWORD: kotaro220
+      DATABASE_NAME: tododb
+    depends_on:
+      - database
+    command: >
+      sh -c "
+      until nc -z database 5432; do
+        echo 'Waiting for database to be ready...';
+        sleep 2;
+      done;
+      ./main" # データベース接続後にアプリを起動
+
+  database:
+    image: postgres:14
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: kotaroikeda
+      POSTGRES_PASSWORD: kotaro220
+      POSTGRES_DB: tododb
+    ports:
+      - "15432:5432" # ホスト側のポートを15432に変更
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend-container
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
