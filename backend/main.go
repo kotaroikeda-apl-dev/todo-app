@@ -26,6 +26,11 @@ func main() {
     r.POST("/api/tasks", handlers.CreateTask)
     r.PUT("/api/tasks/:id", handlers.UpdateTask)
     r.DELETE("/api/tasks/:id", handlers.DeleteTask)
+    r.GET("/", func(c *gin.Context) {
+   	 c.JSON(200, gin.H{
+        	"status": "healthy",
+   	 })
+    })
 
     r.Run(":8080")
 }
