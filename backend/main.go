@@ -30,7 +30,7 @@ func main() {
 	r.POST("/api/tasks", handlers.CreateTask)
 	r.PUT("/api/tasks/:id", handlers.UpdateTask)
 	r.DELETE("/api/tasks/:id", handlers.DeleteTask)
-	r.GET("/api/health", func(c *gin.Context) {
+	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "healthy",
 		})
