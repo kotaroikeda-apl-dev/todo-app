@@ -6,7 +6,7 @@ services:
       context: ./backend
     container_name: backend-container
     ports:
-      - "8080:8080"
+      - "8443:8080" # バックエンドのポートを8443で公開
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_USER: ${DATABASE_USER}
@@ -39,7 +39,7 @@ services:
       context: ./frontend
     container_name: frontend-container
     ports:
-      - "3000:80"
+      - "443:80" # フロントエンドを443ポートで公開
     depends_on:
       - backend
 
