@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"todo/config"
 	"todo/handlers"
 
@@ -24,8 +23,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// データベース接続
-	config.ConnectDB()
+	config.ConnectDB() // データベース接続
 
 	// ルーティング設定
 	r.GET("/api/tasks", handlers.GetTasks)
@@ -38,13 +36,5 @@ func main() {
 		})
 	})
 
-	// HTTPS サーバー起動
-	certFile := "/path/to/server.crt" // 証明書ファイルのパス
-	keyFile := "/path/to/server.key"  // 秘密鍵ファイルのパス
-
-	log.Println("Starting HTTPS server on port 8443...")
-	err := r.RunTLS(":8443", certFile, keyFile)
-	if err != nil {
-		log.Fatalf("Failed to start HTTPS server: %v", err)
-	}
+	r.Run(":8080")
 }
