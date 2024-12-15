@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://www.focus-todo.com/api/tasks';
+const API_BASE_URL = 'https://www.focus-todo.com:8443/api/tasks';
 
 // タスクの取得
 export const getTasks = async () => {
