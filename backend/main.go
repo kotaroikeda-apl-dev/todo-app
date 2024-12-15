@@ -16,6 +16,7 @@ func main() {
 		AllowOrigins: []string{
 			"http://localhost:3000",
 			"http://todo-elb-121795785.ap-northeast-1.elb.amazonaws.com",
+			"https://www.focus-todo.com",
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
