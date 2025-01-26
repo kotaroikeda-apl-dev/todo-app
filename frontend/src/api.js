@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const API_BASE_URL = `${process.env.REACT_APP_URL_DOMAIN}/api/tasks`;
-console.log('API Base URL:', API_BASE_URL); // コンソールで確認
 
 // タスクの取得
 export const getTasks = async () => {
