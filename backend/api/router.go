@@ -1,7 +1,7 @@
 package api
 
 import (
-	"todo/handlers"
+	"todo/controllers"
 	"todo/middlewares"
 
 	"github.com/gin-gonic/gin"
@@ -12,10 +12,10 @@ func RegisterRoutes(r *gin.Engine) {
 	r.Use(middlewares.CORSConfig())
 
 	// API ルート
-	r.GET("/api/tasks", handlers.GetTasks)
-	r.POST("/api/tasks", handlers.CreateTask)
-	r.PUT("/api/tasks/:id", handlers.UpdateTask)
-	r.DELETE("/api/tasks/:id", handlers.DeleteTask)
+	r.GET("/api/tasks", controllers.GetTasks)
+	r.POST("/api/tasks", controllers.CreateTask)
+	r.PUT("/api/tasks/:id", controllers.UpdateTask)
+	r.DELETE("/api/tasks/:id", controllers.DeleteTask)
 
 	// ヘルスチェック
 	r.GET("/health", func(c *gin.Context) {
