@@ -40,10 +40,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-	}
+	var input models.TaskUpdateRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
