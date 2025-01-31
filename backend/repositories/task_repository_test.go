@@ -69,6 +69,8 @@ func TestCreateTask(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, "New Task", result.Title)
+	assert.Equal(t, "New Task Description", result.Description)
+	assert.Equal(t, false, result.Completed)
 }
 
 func TestFindTaskByID(t *testing.T) {
@@ -109,6 +111,8 @@ func TestUpdateTask(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, "Updated Task", result.Title)
+	assert.Equal(t, "Updated Description", result.Description)
+	assert.Equal(t, false, result.Completed)
 }
 
 func TestDeleteTask(t *testing.T) {
