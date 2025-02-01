@@ -2,34 +2,45 @@ package repositories
 
 import (
 	"time"
-	"todo/config"
 	"todo/models"
+
+	"gorm.io/gorm"
 )
 
-func FindAllTasks() ([]models.Task, error) {
+// taskRepository の実装
+type taskRepository struct {
+	db *gorm.DB
+}
+
+// NewTaskRepository は TaskRepository のインスタンスを作成
+func NewTaskRepository(db *gorm.DB) TaskRepository {
+	return &taskRepository{db: db}
+}
+
+func (r *taskRepository) FindAllTasks() ([]models.Task, error) {
 	var tasks []models.Task
-	if err := config.DB.Find(&tasks).Error; err != nil {
+	if err := r.db.Find(&tasks).Error; err != nil {
 		return nil, err
 	}
 	return tasks, nil
 }
 
-func CreateTask(task *models.Task) (*models.Task, error) {
-	if err := config.DB.Create(task).Error; err != nil {
+func (r *taskRepository) CreateTask(task *models.Task) (*models.Task, error) {
+	if err := r.db.Create(task).Error; err != nil {
 		return nil, err
 	}
 	return task, nil
 }
 
-func FindTaskByID(id int) (*models.Task, error) {
+func (r *taskRepository) FindTaskByID(id int) (*models.Task, error) {
 	var task models.Task
-	if err := config.DB.First(&task, id).Error; err != nil {
+	if err := r.db.First(&task, id).Error; err != nil {
 		return nil, err
 	}
 	return &task, nil
 }
 
-func UpdateTask(task *models.Task) (*models.Task, error) {
+func (r *taskRepository) UpdateTask(task *models.Task) (*models.Task, error) {
 	task.UpdatedAt = time.Now().UTC().Truncate(time.Microsecond)
 
 	sqlUpdateTask := `
@@ -38,7 +49,7 @@ func UpdateTask(task *models.Task) (*models.Task, error) {
 		WHERE id = $5
 	`
 
-	tx := config.DB.Begin()
+	tx := r.db.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -55,8 +66,8 @@ func UpdateTask(task *models.Task) (*models.Task, error) {
 	return task, nil
 }
 
-func DeleteTask(task *models.Task) error {
-	if err := config.DB.Delete(task).Error; err != nil {
+func (r *taskRepository) DeleteTask(task *models.Task) error {
+	if err := r.db.Delete(task).Error; err != nil {
 		return err
 	}
 	return nil

@@ -9,62 +9,70 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetTasks(c *gin.Context) {
-	tasks, err := services.GetAllTasks()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve tasks"})
-		return
-	}
-	c.JSON(http.StatusOK, tasks)
+type TaskController struct {
+	service services.TaskService
 }
 
-func CreateTask(c *gin.Context) {
+func NewTaskController(service services.TaskService) *TaskController {
+	return &TaskController{service: service}
+}
+
+func (c *TaskController) GetTasks(ctx *gin.Context) {
+	tasks, err := c.service.GetAllTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve tasks"})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
+}
+
+func (c *TaskController) CreateTask(ctx *gin.Context) {
 	var task models.Task
-	if err := c.ShouldBindJSON(&task); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&task); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	createdTask, err := services.CreateTask(&task)
+	createdTask, err := c.service.CreateTask(&task)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create task"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create task"})
 		return
 	}
-	c.JSON(http.StatusOK, createdTask)
+	ctx.JSON(http.StatusOK, createdTask)
 }
 
-func UpdateTask(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+func (c *TaskController) UpdateTask(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
 		return
 	}
 
 	var input models.TaskUpdateRequest
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updatedTask, err := services.UpdateTask(id, input.Title, input.Description)
+	updatedTask, err := c.service.UpdateTask(id, input.Title, input.Description)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, updatedTask)
+	ctx.JSON(http.StatusOK, updatedTask)
 }
 
-func DeleteTask(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+func (c *TaskController) DeleteTask(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
 		return
 	}
 
-	err = services.DeleteTask(id)
+	err = c.service.DeleteTask(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Task deleted"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted"})
 }

@@ -3,7 +3,6 @@ package repositories_test
 import (
 	"testing"
 	"time"
-	"todo/config"
 	"todo/models"
 	"todo/repositories"
 
@@ -14,7 +13,7 @@ import (
 )
 
 // テスト用にDBをモックする
-func setupMockDB(t *testing.T) sqlmock.Sqlmock {
+func setupMockDB(t *testing.T) (repositories.TaskRepository, sqlmock.Sqlmock) {
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("Failed to create mock DB: %v", err)
@@ -27,25 +26,25 @@ func setupMockDB(t *testing.T) sqlmock.Sqlmock {
 		t.Fatalf("Failed to open mock GORM DB: %v", err)
 	}
 
-	config.DB = gormDB
-	return mock
+	repo := repositories.NewTaskRepository(gormDB)
+	return repo, mock
 }
 
 func TestFindAllTasks(t *testing.T) {
-	mock := setupMockDB(t)
+	repo, mock := setupMockDB(t)
 
 	mock.ExpectQuery(`SELECT \* FROM "tasks"`).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "title", "description"}).
 			AddRow(1, "Task 1", "Description 1").
 			AddRow(2, "Task 2", "Description 2"))
 
-	tasks, err := repositories.FindAllTasks()
+	tasks, err := repo.FindAllTasks()
 	assert.NoError(t, err)
 	assert.Len(t, tasks, 2)
 }
 
 func TestCreateTask(t *testing.T) {
-	mock := setupMockDB(t)
+	repo, mock := setupMockDB(t)
 
 	// `time.Now().UTC().Truncate(time.Microsecond)` で精度を統一
 	now := time.Now().UTC().Truncate(time.Microsecond)
@@ -60,12 +59,11 @@ func TestCreateTask(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectQuery(`INSERT INTO "tasks" \("title","description","completed","created_at","updated_at"\) VALUES \(\$1,\$2,\$3,\$4,\$5\) RETURNING "id"`).
-		WithArgs(task.Title, task.Description, task.Completed, now, now). // 時刻を正確にマッチ
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))         // Query なので `WillReturnRows`
-
+		WithArgs(task.Title, task.Description, task.Completed, now, now).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	mock.ExpectCommit()
 
-	result, err := repositories.CreateTask(task)
+	result, err := repo.CreateTask(task)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, "New Task", result.Title)
@@ -74,21 +72,21 @@ func TestCreateTask(t *testing.T) {
 }
 
 func TestFindTaskByID(t *testing.T) {
-	mock := setupMockDB(t)
+	repo, mock := setupMockDB(t)
 
 	mock.ExpectQuery(`SELECT \* FROM "tasks" WHERE "tasks"."id" = \$1 ORDER BY "tasks"."id" LIMIT \$2`).
 		WithArgs(1, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "title", "description"}).
 			AddRow(1, "Task 1", "Description 1"))
 
-	task, err := repositories.FindTaskByID(1)
+	task, err := repo.FindTaskByID(1)
 	assert.NoError(t, err)
 	assert.NotNil(t, task)
 	assert.Equal(t, "Task 1", task.Title)
 }
 
 func TestUpdateTask(t *testing.T) {
-	mock := setupMockDB(t)
+	repo, mock := setupMockDB(t)
 
 	// `updated_at` の精度を統一
 	now := time.Now().UTC().Truncate(time.Microsecond)
@@ -107,7 +105,7 @@ func TestUpdateTask(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	result, err := repositories.UpdateTask(task)
+	result, err := repo.UpdateTask(task)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, "Updated Task", result.Title)
@@ -116,13 +114,13 @@ func TestUpdateTask(t *testing.T) {
 }
 
 func TestDeleteTask(t *testing.T) {
-	mock := setupMockDB(t)
+	repo, mock := setupMockDB(t)
 
 	task := &models.Task{ID: 1}
 	mock.ExpectBegin()
 	mock.ExpectExec(`DELETE FROM "tasks" WHERE "tasks"."id" = \$1`).WithArgs(task.ID).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	err := repositories.DeleteTask(task)
+	err := repo.DeleteTask(task)
 	assert.NoError(t, err)
 }
