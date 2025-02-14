@@ -1,4 +1,0 @@
-# フロントエンドで不要なファイルを除外
-node_modules
-build
-.git
