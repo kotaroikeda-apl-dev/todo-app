@@ -13,7 +13,7 @@ export const Todo = () => {
     const newTodos = [...incompleteTodos, todoText];
     setIncompleteTodos(newTodos);
     setTodoText("");
-  }
+  };
 
   const onClickDelete = (index) => {
     const newTodos = [...incompleteTodos];
@@ -28,7 +28,16 @@ export const Todo = () => {
     const newCompleteTodos = [...completeTodos, incompleteTodos[index]];
     setIncompleteTodos(newIncompleteTodos);
     setCompleteTodos(newCompleteTodos);
-  }
+  };
+
+  const onClickback = (index) => {
+    const newCompleteTodos = [...completeTodos];
+    newCompleteTodos.splice(index,1);
+
+    const newIncompleteTodos = [...incompleteTodos, completeTodos[index]];
+    setCompleteTodos(newCompleteTodos);
+    setIncompleteTodos(newIncompleteTodos);
+  };
 
   return (
     <>
@@ -54,11 +63,11 @@ export const Todo = () => {
       <div className="complete-area">
         <p className="title">完了のTODO</p>
         <ul>
-          {completeTodos.map((todo) => (
+          {completeTodos.map((todo,index) => (
             <li key={todo}>
             <div className="list-row">
               <p className="todo-item">{todo}</p>
-              <button>戻す</button>
+              <button onClick={() => onClickback(index)}>戻す</button>
             </div>
           </li>
           ))}
